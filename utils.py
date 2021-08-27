@@ -28,7 +28,7 @@ import seabornfig2grid as sfg
 
 
 
-def target_distribution(target):
+def target_distribution(target, save =False, trace_name = None):
     """
     Plot Histogram and boxplot for target variable
     params: target - Series, np.array
@@ -40,6 +40,10 @@ def target_distribution(target):
     plt.subplot(2,1,2)
     plt.boxplot(target, vert = False)
     plt.xlabel('Depended variable')
+    
+    if save:
+        plt.savefig(trace_name)
+    
     return plt.show()
 
 
