@@ -246,6 +246,39 @@ def check_rhat(trace, threshold = 1.01):
 
 
 
+def plot_params_correlation(trace, var_names, y):
+    """
+    Build plot to show relationship btween df values and y values
+    params: 
+            df - pd.Dataframe, numeric values
+            y  - target variable name, string 
+    """
+    ncols=round(len(var_names)/2)
+    nrows=round(ncols/2)
+    
+    joinplots = []
+
+    for var in var_names:
+        jp_var = sns.jointplot(x= trace[y], y= trace[var], kind='scatter', space=0, color='steelblue')
+        jp_var.set_axis_labels(var, y)
+        #jp_var = sns.regplot(x= trace[var], y= trace[y], color='steelblue')
+        joinplots.append(jp_var)
+
+    fig = plt.figure(figsize=(13,8))
+    gs = gridspec.GridSpec(nrows, ncols)
+
+    for i,jp in enumerate(joinplots):
+        mg= sfg.SeabornFig2Grid(jp, fig, gs[i])
+
+    gs.tight_layout(fig)
+    gs.update(top=0.9)
+
+    plt.show()
+
+    
+########################## NOT USING ##########################
+
+
 def plot_correlation(trace, data):
     """
     ploting correlation btw slope and intercept
@@ -257,8 +290,8 @@ def plot_correlation(trace, data):
     df = pd.DataFrame(trace['beta'], columns=data.columns[:-1])
     df['alpha'] = trace['alpha']
     
-    ncols=int(len(df.columns)/2)
-    nrows=int(ncols/2)
+    ncols=round(len(df.columns)/2)
+    nrows=round(ncols/2)
     k=0
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(16, 6))
