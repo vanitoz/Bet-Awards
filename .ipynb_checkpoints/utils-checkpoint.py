@@ -20,8 +20,9 @@ import arviz as az
 import warnings
 warnings.filterwarnings("ignore")
 
-
-
+sns.set(style="darkgrid")
+import matplotlib.gridspec as gridspec
+import seabornfig2grid as sfg
 
 #### FUNCTIONS FOR EDA ####
 
@@ -46,13 +47,28 @@ def plot_relationship(df, y):
     """
     Build plot to show relationship btween df values and y values
     params: 
-            df - continuous, numeric values
-            y - continuous, numeric values 
+            df - pd.Dataframe, numeric values
+            y  - target variable name, string 
     """
-    for col in df.columns:
-        sns.jointplot(x=df[col], y = y, kind='reg', height=4)
-        plt.show()
+    ncols=int(len(df.columns)/2)
+    nrows=int(ncols/2)
+    
+    joinplots = []
 
+    for col in df.columns[:-1]:
+        jp_col = sns.jointplot(x= df[col], y= df[y], kind='reg', space=0, color='steelblue')
+        joinplots.append(jp_col)
+
+    fig = plt.figure(figsize=(13,8))
+    gs = gridspec.GridSpec(nrows, ncols)
+
+    for i,jp in enumerate(joinplots):
+        mg= sfg.SeabornFig2Grid(jp, fig, gs[i])
+
+    gs.tight_layout(fig)
+    gs.update(top=0.9)
+
+    plt.show()
 
 
 def features_corr_matrix(df, threshold, matrix = False):
