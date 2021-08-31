@@ -311,3 +311,38 @@ def plot_correlation(trace, data):
             k+=1
 
     return plt.show()
+
+
+def calculate_contribution(trace, plot = True, summary = False, standardized = False):
+    
+    var_names = trace.varnames
+    df_summary = az.summary(trace, var_names = var_names[1:-2])[['mean','sd']]
+    df_summary['mean2'] = df_summary['mean'].apply(lambda x: x*x)
+    
+    if standardized:
+        df_summary['sd2'] = 1
+    else: 
+        df_summary['sd2'] = df_summary['sd'].apply(lambda x: x*x)
+    df_summary['mean2*sd2'] =  df_summary.mean2*df_summary.sd2
+    
+    pcts = list(zip(df_summary.index, 
+                [round(value/sum(df_summary['mean2*sd2'])*100, 
+                       5) for value in df_summary['mean2*sd2'].values]))
+    
+    df_summary['contribution_pct'] = [x[1] for x in pcts]
+    
+    if plot:
+        
+        #Seaborn Horizontal barplot
+        sns.set_style("darkgrid")
+        bar,ax = plt.subplots(figsize=(8,4))
+        ax = sns.barplot(x="contribution_pct", y=df_summary.index, data=df_summary, ci=None, palette="muted",orient='h' )
+        ax.set_title("Contribution to tune_in_i", fontsize=15)
+        ax.set_xlabel ("Percentage")
+        ax.set_ylabel ("Channel Type")
+        for rect in ax.patches:
+            ax.text (rect.get_width(), rect.get_y() + rect.get_height() / 2,"%.1f%%"% rect.get_width(), weight='bold' )
+
+        # bar.savefig("Seaborn_Bar_Vertical.png");
+    if summary:
+        return df_summary
